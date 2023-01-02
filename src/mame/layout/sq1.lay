@@ -1,0 +1,522 @@
+<?xml version="1.0"?>
+<!--
+license:CC0
+-->
+<!-- 2022-12-31: Initial version.  [Parduz from R. Belmont / VFDGen 0.1 and PSR60] -->
+
+<mamelayout version="2">
+
+	<!-- ================================================= KEYBOARD ================================================= -->
+	<!-- keyboard primitives -->
+	<element name="BlackKeysvg" defstate="0">
+		<image state="0"><data><![CDATA[
+			<svg>
+			  <defs>
+			    <linearGradient id="BlackKeyOff">
+			      <stop style="stop-color: rgb(140, 140, 140);" offset="0"/>
+			      <stop style="stop-color: rgb( 40,  40,  40);" offset="1"/>
+			    </linearGradient>
+
+			    <linearGradient id="BlackKeyOff-0" x1="0%" y1="0%" x2="0%" y2="100%" xlink:href="#BlackKeyOff"/>
+			    <linearGradient id="BlackKeyOff-1" x1="0%" y1="100%" x2="0%" y2="0%" xlink:href="#BlackKeyOff"/>
+
+			  </defs>
+			  <g>
+			    <rect width="14" height="60" style="stroke: rgb(0, 0, 0); fill: rgb(17, 17, 17);"/>
+			    <polygon style="fill: url(#BlackKeyOff-0);" points=" 0  0    2 54   12 54   14  0"/>
+			    <polygon style="fill: url(#BlackKeyOff-1);" points=" 0 60    2 54   12 54   14 60"/>
+			    <rect width="14" height="60" style="stroke: rgb(0, 0, 0); fill: none;"/>
+			  </g>
+			</svg>
+		]]></data></image>
+
+		<image state="1"><data><![CDATA[
+			<svg>
+			  <defs>
+			    <linearGradient id="BlackKeyOff">
+			      <stop style="stop-color: rgb( 90,  90,  90);" offset="1"/>
+			      <stop style="stop-color: rgb( 40,  40,  40);" offset="0"/>
+			    </linearGradient>
+
+			    <linearGradient id="BlackKeyOff-0" x1="0%" y1="0%" x2="0%" y2="100%" xlink:href="#BlackKeyOff"/>
+			    <linearGradient id="BlackKeyOff-1" x1="0%" y1="100%" x2="0%" y2="0%" xlink:href="#BlackKeyOff"/>
+
+			  </defs>
+			  <g>
+			    <rect width="14" height="60" style="stroke: rgb(0, 0, 0); fill: rgb(17, 17, 17);"/>
+			    <polygon style="fill: url(#BlackKeyOff-0);" points="0  0    2 55   12 55   14  0"/>
+			    <polygon style="fill: rgb(40, 40, 40);"     points="0 60    2 55   12 55   14 60"/>
+			    <rect width="14" height="60" style="stroke: rgb(0, 0, 0); fill: none;"/>
+			  </g>
+			</svg>
+		]]></data></image>
+	</element>
+
+	<element name="WhiteKeyC" defstate="0">
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points="  0   0                         0 100    23 100    23  60    14  60    14 0     0 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points="  0   0                         0  99    23  99    23  60    14  60    14 0     0 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                                      
+	<element name="WhiteKeyD" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points="  5   0     5  60     0  60     0 100    24 100    24  60    19 60     19 0     5 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points="  5   0     5  60     0  60     0  99    24  99    24  60    19 60     19 0     5 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                                      
+	<element name="WhiteKeyE" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points="  9   0     9  60     0  60     0 100    23 100                        23 0     9 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points="  9   0     9  60     0  60     0  99    23  99                        23 0     9 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                                      
+	<element name="WhiteKeyF" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points="  0   0                         0 100    24 100    24  60    13  60    13 0     0 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points="  0   0                         0  99    24  99    24  60    13  60    13 0     0 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                                      
+	<element name="WhiteKeyG" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points="  3   0     3  60     0  60     0 100    23 100    23  60    16  60    16 0     3 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points="  3   0     3  60     0  60     0  99    23  99    23  60    16  60    16 0     3 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                                      
+	<element name="WhiteKeyA" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points="  7   0     7  60     0  60     0 100    23 100    23  60    20  60    20 0     7 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points="  7   0     7  60     0  60     0  99    23  99    23  60    20  60    20 0     7 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                                      
+	<element name="WhiteKeyB" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" points=" 11   0    11  60     0  60     0 100    24 100                        24 0    11 0"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <polyline style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" points=" 11   0    11  60     0  60     0  99    24  99                        24 0    11 0"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                        
+	<element name="WhiteKeyLAST" defstate="0">                                                                                                                                                                                                                                                                                                                                                                      
+		<image state="0"><data><![CDATA[<svg> <rect style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #F0F0F0;" width="24" height="100"  />  </svg>]]></data></image>
+		<image state="1"><data><![CDATA[<svg> <rect style="stroke: rgb(0, 0, 0); stroke-width: 2px; fill: #DDDDDD;" width="24" height="100"  />  </svg>]]></data></image>
+	</element>                                                                                                                                                                                                                                                                                                                                                        
+
+	<!-- keyboard group -->
+	<group name="Octave">
+		<element ref="BlackKeysvg"    inputtag="Octave~oct~" inputmask="0x0002"> <bounds x="014"  y="0"  width="14"  height="60"  /> </element>
+		<element ref="BlackKeysvg"    inputtag="Octave~oct~" inputmask="0x0008"> <bounds x="042"  y="0"  width="14"  height="60"  /> </element>
+		<element ref="BlackKeysvg"    inputtag="Octave~oct~" inputmask="0x0040"> <bounds x="083"  y="0"  width="14"  height="60"  /> </element>
+		<element ref="BlackKeysvg"    inputtag="Octave~oct~" inputmask="0x0100"> <bounds x="110"  y="0"  width="14"  height="60"  /> </element>
+		<element ref="BlackKeysvg"    inputtag="Octave~oct~" inputmask="0x0400"> <bounds x="137"  y="0"  width="14"  height="60"  /> </element>
+		<element ref="WhiteKeyC"      inputtag="Octave~oct~" inputmask="0x0001"> <bounds x="000"  y="0"  width="23"  height="100" /> </element>
+		<element ref="WhiteKeyD"      inputtag="Octave~oct~" inputmask="0x0004"> <bounds x="023"  y="0"  width="24"  height="100" /> </element>
+		<element ref="WhiteKeyE"      inputtag="Octave~oct~" inputmask="0x0010"> <bounds x="047"  y="0"  width="23"  height="100" /> </element>
+		<element ref="WhiteKeyF"      inputtag="Octave~oct~" inputmask="0x0020"> <bounds x="070"  y="0"  width="24"  height="100" /> </element>
+		<element ref="WhiteKeyG"      inputtag="Octave~oct~" inputmask="0x0080"> <bounds x="094"  y="0"  width="23"  height="100" /> </element>
+		<element ref="WhiteKeyA"      inputtag="Octave~oct~" inputmask="0x0200"> <bounds x="117"  y="0"  width="23"  height="100" /> </element>
+		<element ref="WhiteKeyB"      inputtag="Octave~oct~" inputmask="0x0800"> <bounds x="140"  y="0"  width="24"  height="100" /> </element>
+	</group>
+
+	<group name="SvgKeyboard">
+		<repeat count="5">
+			<param name="OctW" start="164" increment="0" />
+			<param name="xorigin" start="0" increment="~OctW~" />
+			<param name="oct" start="2" increment="1" />
+			<group ref="Octave" state="0"> <bounds x="~xorigin~" y="0" width="~OctW~" height="100" /> </group>
+		</repeat>
+		<element ref="WhiteKeyLAST" inputtag="Octave7" inputmask="0x0001"><bounds x="820" y="0" width="24" height="100"/></element>
+	</group>
+	<!-- ============================================================================================================ -->
+
+
+
+
+
+	<!-- ================================================== L C D =================================================== -->
+	<!-- LCD character -->
+	<element name="dotrow">
+		<rect>            <bounds x="-0.05" width="5.55" y="-0.05" height="1.1" /> <color red="0.0" green="0.0" blue="0.0" /> </rect>
+		<disk state="0" statemask="0x01"> <bounds x="0.0" /> <color red="0.125" green="0.125" blue="0.125" /> </disk>
+		<disk state="0" statemask="0x02"> <bounds x="1.1" /> <color red="0.125" green="0.125" blue="0.125" /> </disk>
+		<disk state="0" statemask="0x04"> <bounds x="2.2" /> <color red="0.125" green="0.125" blue="0.125" /> </disk>
+		<disk state="0" statemask="0x08"> <bounds x="3.3" /> <color red="0.125" green="0.125" blue="0.125" /> </disk>
+		<disk state="0" statemask="0x10"> <bounds x="4.4" /> <color red="0.125" green="0.125" blue="0.125" /> </disk>
+		<disk           statemask="0x01"> <bounds x="0.0" /> </disk>
+		<disk           statemask="0x02"> <bounds x="1.1" /> </disk>
+		<disk           statemask="0x04"> <bounds x="2.2" /> </disk>
+		<disk           statemask="0x08"> <bounds x="3.3" /> </disk>
+		<disk           statemask="0x10"> <bounds x="4.4" /> </disk>
+	</element>
+	<!-- 2x16 LCD display -->
+	<group name="basic2x16LCDpage">
+		<repeat count="2">
+			<param name="origin" start="~start~" increment="112" />
+			<param name="row" start="0" increment="10" />
+			<repeat count="16">
+				<param name="char" start="~origin~" increment="7" />
+				<param name="x" start="0" increment="6" />
+				<repeat count="7">
+					<param name="n" start="~char~" increment="1" />
+					<param name="y" start="~row~" increment="1" />
+					<element name="pg_~n~" ref="dotrow" state="0">
+						<bounds x="~x~" y="~y~" width="5" height="1" />
+					</element>
+				</repeat>
+			</repeat>
+		</repeat>
+	</group>
+	<!-- ============================================================================================================ -->
+
+
+
+
+
+	<!-- ======================================== BUTTONS AND LEDS PRIMITIVES ======================================= -->
+	<!-- "global" dimensions handy to build the layout -->
+	<param name="textH" value="15" />
+	<param name="bigtH" value="19" />
+	<param name="btnW"  value="45" />
+	<param name="ledW"  value="10" />
+	<param name="ledH"  value="6"  />
+	<param name="boxH"  value="250"  />
+
+
+	<!-- LEDs primitives -->
+	<element name="rLeds">
+		<rect state ="0"> <color red="0.2" green="0.2" blue="0.0" /> </rect>	<!-- Off    -->
+		<rect state ="1"> <color red="1.0" green="1.0" blue="0.0" /> </rect>	<!-- On     -->
+		<rect state ="2"> <color red="0.0" green="1.0" blue="1.0" /> </rect>	<!-- Blink  -->
+		<rect state ="3"> <color red="1.0" green="0.0" blue="0.0" /> </rect>	<!-- ???    -->
+	</element>
+	<!-- Button primitives -->
+	<element name="button-sml" defstate="0">
+		<rect state="0"><bounds left="00" top="00" right="45" bottom="20" /><color red="0.3"  green="0.3"  blue="0.3" /></rect><!-- Top Bevel -->
+		<rect state="0"><bounds left="02" top="02" right="45" bottom="20" /><color red="0.1"  green="0.1"  blue="0.1" /></rect><!-- Bottom Bevel -->
+		<rect state="1"><bounds left="00" top="00" right="45" bottom="20" /><color red="0.1"  green="0.1"  blue="0.1" /></rect>
+		<rect state="1"><bounds left="02" top="02" right="45" bottom="20" /><color red="0.3"  green="0.3"  blue="0.3" /></rect>
+		<rect>          <bounds left="02" top="02" right="43" bottom="18" /><color red="0.2"  green="0.2"  blue="0.2" /></rect><!-- Button Face -->
+	</element>
+	<element name="button-big" defstate="0">
+		<rect state="0"><bounds left="00" top="00" right="45" bottom="30" /><color red="0.3"  green="0.3"  blue="0.3" /></rect><!-- Top Bevel -->
+		<rect state="0"><bounds left="02" top="02" right="45" bottom="30" /><color red="0.1"  green="0.1"  blue="0.1" /></rect><!-- Bottom Bevel -->
+		<rect state="1"><bounds left="00" top="00" right="45" bottom="30" /><color red="0.1"  green="0.1"  blue="0.1" /></rect>
+		<rect state="1"><bounds left="02" top="02" right="45" bottom="30" /><color red="0.3"  green="0.3"  blue="0.3" /></rect>
+		<rect>          <bounds left="02" top="02" right="43" bottom="28" /><color red="0.2"  green="0.2"  blue="0.2" /></rect><!-- Button Face -->
+	</element>
+	<element name="button-gry" defstate="0">
+		<rect state="0"><bounds left="00" top="00" right="45" bottom="30" /><color red="0.5"  green="0.5"  blue="0.5" /></rect><!-- Top Bevel -->
+		<rect state="0"><bounds left="02" top="02" right="45" bottom="30" /><color red="0.3"  green="0.3"  blue="0.3" /></rect><!-- Bottom Bevel -->
+		<rect state="1"><bounds left="00" top="00" right="45" bottom="30" /><color red="0.3"  green="0.3"  blue="0.3" /></rect>
+		<rect state="1"><bounds left="02" top="02" right="45" bottom="30" /><color red="0.5"  green="0.5"  blue="0.5" /></rect>
+		<rect>          <bounds left="02" top="02" right="43" bottom="28" /><color red="0.4"  green="0.4"  blue="0.4" /></rect><!-- Button Face -->
+	</element>
+	<!-- ============================================================================================================ -->
+
+
+
+
+
+	<!-- ================================================== LABELS ================================================== -->
+	<!-- body labels -->
+	<element name="sq1">        <text string="SQ'1"                align="1" /></element>
+	<element name="labnsd">     <text string="Sounds"              align="1" /></element>
+	<element name="labseq">     <text string="Sequences/Presets"   align="1" /></element>
+	<!-- slider labels -->
+	<element name="slidervol">  <text string="Volume"              align="0" /></element>
+	<element name="sliderdata"> <text string="Data Entry"          align="0" /></element>
+
+	<!-- Tracks/Sequencers labels -->
+	<element name="label0">     <text string="0"           align="1" /></element>
+	<element name="label1">     <text string="1"           align="1" /></element>
+	<element name="label2">     <text string="2"           align="1" /></element>
+	<element name="label3">     <text string="3"           align="1" /></element>
+	<element name="label4">     <text string="4"           align="1" /></element>
+	<element name="label5">     <text string="5"           align="1" /></element>
+	<element name="label6">     <text string="6"           align="1" /></element>
+	<element name="label7">     <text string="7"           align="1" /></element>
+	<element name="label8">     <text string="8"           align="1" /></element>
+	<element name="label9">     <text string="9"           align="1" /></element>
+
+	<element name="rec"   >     <text string="Rec "        align="1" /></element>
+	<element name="stop"  >     <text string="Stop"        align="1" /></element>
+	<element name="play"  >     <text string="Play"        align="1" /></element>
+
+	<!-- Edit and select -->
+	<element name="edit">       <text string="Edit"        align="1" /></element>
+	<element name="select">     <text string="Select"      align="1" /></element>
+	<!-- Navigation -->
+	<element name="yes">        <text string="Yes"         align="0" /></element>
+	<element name="no" >        <text string="No"          align="0" /></element>
+	<element name="enter">      <text string="Enter"       align="1" /></element>
+	<element name="compare" >   <text string="Compare"     align="1" /></element>
+	<!-- ============================================================================================================ -->
+
+
+
+
+
+	<!-- ================================================= SECTIONS ================================================= -->
+	<param name="valAlpha"  value="0.0" /><!-- opacity handy when building the layout -->
+
+	<!-- NAVIGATION AND DISPLAY BOX -->
+	<element name="box-nav"> <rect><color red="0.0" green="0.2" blue="0.2" alpha="~valAlpha~"/></rect></element>
+	<element name="DisplayCase">
+		<rect> <bounds left="0"  top="0"  right="220" bottom="75" /> <color red="0.6" green="0.6" blue="0.6" /> </rect>
+		<rect> <bounds left="4"  top="4"  right="220" bottom="75" /> <color red="0.2" green="0.2" blue="0.2" /> </rect>
+		<rect> <bounds left="4"  top="4"  right="216" bottom="71" /> <color red="0.1" green="0.1" blue="0.1" /> </rect>
+		<rect> <bounds left="10" top="10" right="210" bottom="65" /> <color red="0.0" green="0.0" blue="0.0" /> </rect>
+	</element>
+	<element name="NavArrows">
+		<image><data><![CDATA[
+			<svg>
+			  <path d="M  1049   235 L  1059  245 L  1039  245 L  1049  235 Z" style="fill: #FFFFFF;" />
+			  <path d="M  1005   235 L  1015  245 L   995  245 L  1005  235 Z" style="fill: #FFFFFF;" transform="matrix( 0, -1,  1,  0,  763, 1300)"/>
+			  <path d="M  1005   235 L  1015  245 L   995  245 L  1005  235 Z" style="fill: #FFFFFF;" transform="matrix( 0,  1, -1,  0, 1335, -710)"/>
+			  <path d="M -1049  -342 L -1039 -332 L -1059 -332 L -1049 -342 Z" style="fill: #FFFFFF;" transform="matrix(-1,  0,  0, -1,    0,    0)"/>
+			</svg>
+		]]></data></image>
+	</element>
+	<group name="group-nav"> <bounds x="970" y="130" width="230" height="~boxH~" />
+		<element ref="box-nav"> <bounds x="970" y="130" width="230" height="~boxH~"/> </element>
+		<!-- THE DISPLAY -->
+		<element ref="DisplayCase"> <bounds x="970" y="130" width="220" height="75" /> </element>
+		<param name="start" value="1000" />
+		<group ref="basic2x16LCDpage"> <bounds x="990" y="145" width="180" height="40" /> <color red="1.0" green="1.0" blue="0.0" /> </group>
+		<!-- The NAV buttons -->
+		<element ref="NavArrows"> <bounds x="998" y="235" width="102" height="107" /> </element>
+		<element ref="yes"     > <bounds x="1028" y="274" width="45" height="~textH~" /> </element>
+		<element ref="no"      > <bounds x="1028" y="296" width="45" height="~textH~" /> </element>
+		<element ref="enter"   > <bounds x="1140" y="293" width="45" height="~textH~" /> </element>
+		<element ref="compare" > <bounds x="1140" y="238" width="45" height="~textH~" /> </element>
+		<element ref="button-sml" inputtag="BUT1" inputmask="0x1000" > <bounds x="1140" y="310" width="~btnW~" height="20" />      </element><!-- PORT_NAME("ENTER")      // 172=ENTER            -->
+		<element ref="button-sml" inputtag="BUT1" inputmask="0x2000" > <bounds x="1140" y="255" width="~btnW~" height="20" />      </element><!-- PORT_NAME("COMPARE")    // 173=COMPARE          -->
+		<element ref="button-sml" inputtag="BUT2" inputmask="0x4000" > <bounds x="980"  y="310" width="~btnW~" height="20" />      </element><!-- PORT_NAME("ROM/INT SELECT -")  // 157=ROM/INT Select  190=track - -->
+		<element ref="button-sml" inputtag="BUT1" inputmask="0x8000" > <bounds x="1026" y="255" width="~btnW~" height="20" />      </element><!-- PORT_NAME("PROG UP")    // 141=ProgUp           -->
+		<element ref="button-sml" inputtag="BUT1" inputmask="0x4000" > <bounds x="1026" y="310" width="~btnW~" height="20" />      </element><!-- PORT_NAME("PROG DN")    // 140=ProgDn           -->
+		<element ref="button-sml" inputtag="BUT2" inputmask="0x2000" > <bounds x="1072" y="310" width="~btnW~" height="20" />      </element><!-- PORT_NAME("ROM/INT SELECT +")  // 156=ROM/INT Select  189=track + -->
+	</group>
+
+	<!-- SOUND EDIT/SELECT BOX -->
+	<element name="box-editsnd"> <rect><color red="0.2" green="0.0" blue="0.0"  alpha="~valAlpha~"/></rect> </element>
+	<group name="group-editsnd">   <bounds x="1245"  y="130"  width="60"   height="~boxH~" />
+		<element ref="box-editsnd"><bounds x="1245"  y="130"  width="60"   height="~boxH~" /></element>
+		<element ref="edit"                                          > <bounds x="1257" y="145" width="48"     height="~textH~"/>  </element>
+		<element ref="select"                                        > <bounds x="1257" y="285" width="48"     height="~textH~"/>  </element>
+		<element ref="rLeds"      name="rLed_00"                     > <bounds x="1245" y="152" width="~ledW~" height="~ledH~" />  </element>
+		<element ref="rLeds"      name="rLed_08"                     > <bounds x="1245" y="292" width="~ledW~" height="~ledH~" />  </element>
+		<element ref="button-big" inputtag="BUT2" inputmask="0x0002" > <bounds x="1245" y="170" width="~btnW~" height="30"/>       </element><!-- PORT_NAME("SOUND EDIT")        // 181=SOUND Edit                  -->
+		<element ref="button-big" inputtag="BUT2" inputmask="0x0001" > <bounds x="1245" y="310" width="~btnW~" height="30"/>       </element><!-- PORT_NAME("SOUND SELECT")      // 180=SOUND Select                -->
+	</group>
+
+	<!-- SEQUENCER EDIT/SELECT BOX -->
+	<element name="box-editseq"> <rect><color red="0.0" green="0.0" blue="0.2"  alpha="~valAlpha~"/></rect> </element>
+	<group name="group-editseq">   <bounds x="1870"  y="130"  width="60"   height="~boxH~" />
+		<element ref="box-editseq"><bounds x="1870"  y="130"  width="60"   height="~boxH~" /></element>
+		<element ref="edit"                                          > <bounds x="1882" y="145" width="48"     height="~textH~"/>  </element>
+		<element ref="select"                                        > <bounds x="1882" y="285" width="48"     height="~textH~"/>  </element>
+		<element ref="rLeds"      name="rLed_09"                     > <bounds x="1870" y="152" width="~ledW~" height="~ledH~" />  </element>
+		<element ref="rLeds"      name="rLed_01"                     > <bounds x="1870" y="292" width="~ledW~" height="~ledH~" />  </element>
+		<element ref="button-big" inputtag="BUT2" inputmask="0x0004" > <bounds x="1870" y="170" width="~btnW~" height="30"/>       </element><!-- PORT_NAME("SOUND EDIT")        // 181=SOUND Edit                  -->
+		<element ref="button-big" inputtag="BUT2" inputmask="0x0008" > <bounds x="1870" y="310" width="~btnW~" height="30"/>       </element><!-- PORT_NAME("SOUND SELECT")      // 180=SOUND Select                -->
+	</group>
+
+	<!-- SOUND / BANKS BOX -->
+	<element name="group-sounds-labels-row0">                                                                  
+		<rect><bounds x="1350"  y="0"  width="460"  height="~textH~" /><color red="0.0" green="0.0" blue="0.3" alpha="~valAlpha~"/></rect>  
+		<text string=". . . . . . . . Track . . . . . . . ." align="0"> <bounds x="1580"  y="0" width="150" height="~textH~"/> </text>
+	</element>                                                                                                 
+	<element name="group-sounds-labels-row1">                                                                  
+		<rect><bounds x="1350"  y="0"  width="460"  height="~textH~" /><color red="0.0" green="0.0" blue="0.3"  alpha="~valAlpha~"/></rect>  
+		<text string="Locate"      align="0"> <bounds x="1350"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Control"     align="0"> <bounds x="1396"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Click"       align="0"> <bounds x="1442"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Song"        align="0"> <bounds x="1488"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Seq"         align="0"> <bounds x="1534"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Event"       align="0"> <bounds x="1580"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Param"       align="0"> <bounds x="1626"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Mix"         align="0"> <bounds x="1672"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Effect"      align="0"> <bounds x="1718"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="System"      align="0"> <bounds x="1764"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+	</element>                                                                                                 
+	<element name="group-sounds-labels-row2">                                                                  
+		<rect><bounds x="1350"  y="0"  width="460"  height="~textH~" /><color red="0.0" green="0.3" blue="0.0"  alpha="~valAlpha~"/></rect>  
+		<text string="Wave"        align="0"> <bounds x="1350"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Pitch"       align="0"> <bounds x="1396"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Env1"        align="0"> <bounds x="1442"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Lfo"         align="0"> <bounds x="1488"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Filter"      align="0"> <bounds x="1534"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Env2"        align="0"> <bounds x="1580"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Amp"         align="0"> <bounds x="1626"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Output"      align="0"> <bounds x="1672"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Effect"      align="0"> <bounds x="1718"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="MIDI"        align="0"> <bounds x="1764"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+	</element>                                                                                                 
+	<element name="group-sounds-labels-row3">                                                                  
+		<rect><bounds x="1350"  y="0"  width="460"  height="~textH~" /><color red="0.3" green="0.0" blue="0.0"  alpha="~valAlpha~"/></rect>  
+		<text string="Drums"       align="0"> <bounds x="1718"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="Drums"       align="0"> <bounds x="1764"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+	</element>                                                                                                 
+	<element name="group-sounds-labels-row4">                                                                  
+		<rect><bounds x="1350"  y="0"  width="460"  height="~textH~" /><color red="0.0" green="0.2" blue="0.2"  alpha="~valAlpha~"/></rect>  
+		<text string="0"           align="0"> <bounds x="1350"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="1"           align="0"> <bounds x="1396"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="2"           align="0"> <bounds x="1442"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="3"           align="0"> <bounds x="1488"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="4"           align="0"> <bounds x="1534"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="5"           align="0"> <bounds x="1580"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="6"           align="0"> <bounds x="1626"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="7"           align="0"> <bounds x="1672"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="8"           align="0"> <bounds x="1718"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="9"           align="0"> <bounds x="1764"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+	</element>                                                                                                 
+	<element name="group-sounds-labels-row5">                                                                  
+		<rect><bounds x="1350"  y="0"  width="460"  height="~textH~" /><color red="0.2" green="0.0" blue="0.2"  alpha="~valAlpha~"/></rect>  
+		<text string="·Internal"   align="0"> <bounds x="1350"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="·ROM"        align="0"> <bounds x="1396"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="·Card A"     align="0"> <bounds x="1442"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+		<text string="·Card B"     align="0"> <bounds x="1488"  y="0"  width="~btnW~"   height="~textH~"/>  </text>           
+	</element>                                                                                                 
+
+	<element name="all-labels"> 
+		<rect><bounds left="0" top="0" right="3000" bottom="1000" /><color red="0.0" green="0.3" blue="0.3"  alpha="~valAlpha~"/></rect>
+		<text string="······················Bank"            align="0"> <bounds x="1811" y="265" width="~btnW~" height="~textH~"/> </text>
+	</element>                                                                                                 
+
+	<element name="box-sounds">  <rect><color red="0.2" green="0.2" blue="0.0"  alpha="~valAlpha~"/></rect> </element>
+	<group name="group-sounds">                                        <bounds x="1350" y="130" width="460"    height="~boxH~"  />
+		<element ref="box-sounds">                                     <bounds x="1350" y="130" width="460"    height="~boxH~"  /></element>
+		<element ref="group-sounds-labels-row0">                       <bounds x="1350" y="160" width="460"    height="~textH~" /></element>
+		<element ref="group-sounds-labels-row1">                       <bounds x="1350" y="175" width="460"    height="~textH~" /></element>
+		<element ref="group-sounds-labels-row2">                       <bounds x="1350" y="205" width="460"    height="~textH~" /></element>
+		<element ref="group-sounds-labels-row3">                       <bounds x="1350" y="235" width="460"    height="~textH~" /></element>
+		<element ref="group-sounds-labels-row4">                       <bounds x="1350" y="285" width="460"    height="~textH~" /></element>
+		<element ref="group-sounds-labels-row5">                       <bounds x="1350" y="342" width="460"    height="~textH~" /></element>
+
+		<element ref="button-sml" inputtag="BUT1" inputmask="0x0008" > <bounds x="1350" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("LOCATE")     // 165=LOCATE    (hi 0) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x0002" > <bounds x="1396" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("CONTROL")    // 149=CONTROL   (hi 1) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x0008" > <bounds x="1442" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("CLICK")      // 133=CLICK     (hi 2) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x0020" > <bounds x="1488" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("SONG")       // 183=SONG      (hi 3) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x0080" > <bounds x="1534" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("SEQ")        // 135=SEQ       (hi 4) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x0200" > <bounds x="1580" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("EVENT")      // 143=EVENT     (hi 5) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x0800" > <bounds x="1626" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("PARAM")      // 151=PARAM     (hi 6) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x2000" > <bounds x="1672" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("MIX")        // 167=MIX       (hi 7) -->
+		<element ref="button-sml" inputtag="BUT0" inputmask="0x8000" > <bounds x="1718" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("S. EFFECT")  // 159=S.EFFECT  (hi 8) -->
+		<element ref="button-sml" inputtag="BUT1" inputmask="0x0002" > <bounds x="1764" y="255" width="~btnW~" height="20" />  </element><!-- PORT_NAME("SYSTEM")     // 175=SYSTEM    (hi 9) -->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0004" > <bounds x="1350" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("WAVE")       // 164=WAVE      (lo 0) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x0001" > <bounds x="1396" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("PITCH")      // 148=PITCH     (lo 1) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x0004" > <bounds x="1442" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("ENV1")       // 132=ENV1      (lo 2) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x0010" > <bounds x="1488" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("LFO")        // 182=LFO       (lo 3) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x0040" > <bounds x="1534" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("FILTER")     // 134=FILTER    (lo 4) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x0100" > <bounds x="1580" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("ENV2")       // 142=ENV2      (lo 5) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x0400" > <bounds x="1626" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("AMP")        // 150=AMP       (lo 6) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x1000" > <bounds x="1672" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("OUTPUT")     // 166=OUTPUT    (lo 7) -->
+		<element ref="button-big" inputtag="BUT0" inputmask="0x4000" > <bounds x="1718" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("P. EFFECT")  // 158=P.EFFECT  (lo 8) -->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0001" > <bounds x="1764" y="310" width="~btnW~" height="30" />  </element><!-- PORT_NAME("MIDI")       // 174=MIDI      (lo 9) -->
+	</group>
+
+	<!-- Track group -->
+	<element name="box-Tracks">
+		<rect><bounds x="1990"  y="130"  width="190"  height="~boxH~" /><color red="0.2" green="0.0" blue="0.2"  alpha="~valAlpha~"/></rect>
+		<text string="Tracks" align="1"> <bounds x="1990" y="130"  width="~btnW~"   height="~textH~"/>  </text>
+	</element>
+	<group name="group-track">             <bounds x="1990"  y="130"  width="190"  height="~boxH~" />
+		<element ref="box-Tracks"         ><bounds x="1990"  y="130"  width="190"  height="~boxH~" /></element>
+		<element name="rLed_02" ref="rLeds"                          > <bounds x="1990" y="152" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_03" ref="rLeds"                          > <bounds x="2036" y="152" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_04" ref="rLeds"                          > <bounds x="2082" y="152" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_05" ref="rLeds"                          > <bounds x="2128" y="152" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_10" ref="rLeds"                          > <bounds x="1990" y="222" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_11" ref="rLeds"                          > <bounds x="2036" y="222" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_12" ref="rLeds"                          > <bounds x="2082" y="222" width="~ledW~" height="~ledH~"  />       </element>
+		<element name="rLed_13" ref="rLeds"                          > <bounds x="2128" y="222" width="~ledW~" height="~ledH~"  />       </element>
+		<element                ref="label1"                         > <bounds x="2002" y="145" width="30"     height="~textH~" />       </element>
+		<element                ref="label2"                         > <bounds x="2048" y="145" width="30"     height="~textH~" />       </element>
+		<element                ref="label3"                         > <bounds x="2094" y="145" width="30"     height="~textH~" />       </element>
+		<element                ref="label4"                         > <bounds x="2140" y="145" width="30"     height="~textH~" />       </element>
+		<element                ref="label5"                         > <bounds x="2002" y="215" width="30"     height="~textH~" />       </element>
+		<element                ref="label6"                         > <bounds x="2048" y="215" width="30"     height="~textH~" />       </element>
+		<element                ref="label7"                         > <bounds x="2094" y="215" width="30"     height="~textH~" />       </element>
+		<element                ref="label8"                         > <bounds x="2140" y="215" width="30"     height="~textH~" />       </element>
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0010" > <bounds x="1990" y="170" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 1") 144-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0020" > <bounds x="2036" y="170" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 2") 160-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0040" > <bounds x="2082" y="170" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 3") 152-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0080" > <bounds x="2128" y="170" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 4") 168-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0100" > <bounds x="1990" y="240" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 5") 145-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0200" > <bounds x="2036" y="240" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 6") 161-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0400" > <bounds x="2082" y="240" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 7") 136-->
+		<element ref="button-big" inputtag="BUT1" inputmask="0x0800" > <bounds x="2128" y="240" width="~btnW~" height="30"      />       </element><!-- PORT_NAME("TRACK 8") 176-->
+		<element                ref="rec"                            > <bounds x="1990" y="293" width="~btnW~" height="~textH~" />       </element>
+		<element                ref="stop"                           > <bounds x="2036" y="293" width="~btnW~" height="~textH~" />       </element>
+		<element                ref="play"                           > <bounds x="2082" y="293" width="~btnW~" height="~textH~" />       </element>
+		<element ref="button-gry"                                    > <bounds x="1990" y="310" width="~btnW~" height="30"      />       </element>
+		<element ref="button-gry"                                    > <bounds x="2036" y="310" width="~btnW~" height="30"      />       </element>
+		<element ref="button-gry"                                    > <bounds x="2082" y="310" width="~btnW~" height="30"      />       </element>
+	</group>
+	<!-- ============================================================================================================ -->
+
+
+
+
+
+	<!-- ================================================== DECORS ================================================== -->
+	<element name="sliderhead">
+		<rect x="900"  y="230"  width="10"  height="100"  > <color red="0.0" green="0.0" blue="0.0" /></rect>
+		<rect> <bounds x="0" y="0"  width="40" height="10" /> <color red="0.3" green="0.3" blue="0.3" /> </rect>
+		<rect> <bounds x="0" y="10" width="40" height="14" /> <color red="0.2" green="0.2" blue="0.2" /> </rect>
+		<rect> <bounds x="0" y="24" width="40" height="10" /> <color red="0.1" green="0.1" blue="0.1" /> </rect>
+		<rect> <bounds x="0" y="16" width="40" height="2"  /> <color red="0.7" green="0.7" blue="0.7" /> </rect>
+	</element>
+
+	<element name="sliderslot">
+		<rect> <bounds x="0"  y="0"  width="40" height="100" /> <color red="1.0" green="0.0" blue="0.0" alpha="~valAlpha~"/></rect>
+		<rect> <bounds x="15" y="0"  width="10" height="100" /> <color red="0.0" green="0.0" blue="0.0" />                  </rect>
+	</element>
+
+	<element name="bodyshapes">
+		<rect> <bounds x="70"    y="0"    width="2860" height="580"  /> <color red="0.08" green="0.08" blue="0.08" /> </rect><!-- "TopPanel"   -->
+		<rect> <bounds x="0"     y="0"    width="70"   height="1000" /> <color red="0.10" green="0.10" blue="0.10" /> </rect><!-- "SpondaSX"   -->
+		<rect> <bounds x="2930"  y="0"    width="70"   height="1000" /> <color red="0.10" green="0.10" blue="0.10" /> </rect><!-- "SpondaDX"   -->
+		<rect> <bounds x="70"    y="580"  width="310"  height="420"  /> <color red="0.12" green="0.12" blue="0.12" /> </rect><!-- "WheelsPanel"-->
+		<rect> <bounds x="2880"  y="580"  width="50"   height="420"  /> <color red="0.12" green="0.12" blue="0.12" /> </rect><!-- "SpondinaDX" -->
+		<rect> <bounds x="160"   y="670"  width="30"   height="180"  /> <color red="0.20" green="0.20" blue="0.20" /> </rect><!-- "PitchWheel" -->
+		<rect> <bounds x="270"   y="670"  width="30"   height="180"  /> <color red="0.20" green="0.20" blue="0.20" /> </rect><!-- "ModWheel"   -->
+
+		<!-- "Virtual" areas -->
+		<rect> <bounds x="190"   y="130"  width="560"  height="~boxH~"  /> <color red="0.4" green="0.4" blue="0.4" alpha="~valAlpha~" /> </rect><!-- "LogoArea"   -->
+		<rect> <bounds x="2270"  y="130"  width="600"  height="~boxH~"  /> <color red="0.5" green="0.5" blue="0.5" alpha="~valAlpha~" /> </rect><!-- "CardArea"   -->
+		<rect> <bounds x="760"   y="130"  width="180"  height="~boxH~"  /> <color red="0.6" green="0.6" blue="0.6" alpha="~valAlpha~" /> </rect><!-- "SlidersArea"-->
+		<!-- Blue stripes -->
+		<rect> <bounds x="190"   y="374"  width="560"  height="4"    /> <color red="0.58" green="0.67" blue="1.0"  /> </rect>
+		<rect> <bounds x="760"   y="374"  width="470"  height="4"    /> <color red="0.58" green="0.67" blue="1.0"  /> </rect>
+		<rect> <bounds x="1245"  y="374"  width="90"   height="4"    /> <color red="0.58" green="0.67" blue="1.0"  /> </rect>
+		<rect> <bounds x="1350"  y="374"  width="510"  height="4"    /> <color red="0.58" green="0.67" blue="1.0"  /> </rect>
+		<rect> <bounds x="1870"  y="374"  width="390"  height="4"    /> <color red="0.58" green="0.67" blue="1.0"  /> </rect>
+		<rect> <bounds x="2270"  y="374"  width="580"  height="4"    /> <color red="0.58" green="0.67" blue="1.0"  /> </rect>
+		<!-- <image file="SQ-1.svg">	<bounds left="0" top="0" right="3000" bottom="1000" /> </image> -->
+	</element>
+	<group name="group-body">           <bounds x="0"     y="0"    width="3000"  height="1000"    />
+		<element ref="bodyshapes">      <bounds x="0"     y="0"    width="3000"  height="1000"    /> </element>
+		<element ref="sliderslot">      <bounds x="785"   y="230"  width="40"    height="100"     /> </element>
+		<element ref="sliderslot">      <bounds x="875"   y="230"  width="40"    height="100"     /> </element>
+		<element ref="sliderhead">      <bounds x="785"   y="230"  width="40"    height="34"      /> </element>
+		<element ref="sliderhead">      <bounds x="875"   y="280"  width="40"    height="34"      /> </element>
+
+
+		<element ref="sq1">             <bounds x="200"   y="100"  width="200"   height="~boxH~"  />  </element>
+		<element ref="slidervol">       <bounds x="760"   y="354"  width="90"    height="~bigtH~" />  </element>
+		<element ref="sliderdata">      <bounds x="850"   y="354"  width="90"    height="~bigtH~" />  </element>
+		<element ref="labnsd">          <bounds x="1245"  y="354"  width="250"   height="~bigtH~" />  </element>
+		<element ref="labseq">          <bounds x="1870"  y="354"  width="250"   height="~bigtH~" />  </element>
+	</group>
+	<!-- ============================================================================================================ -->
+
+
+
+
+
+	<!-- ================================================== VIEWS =================================================== -->
+	<view name="SQ1">
+		<group    ref="group-body"   >  <bounds x="0"     y="0"       width="3000"   height="1000"   /></group>
+		<group    ref="SvgKeyboard"  >  <bounds x="380"   y="580"     width="2500"   height="420"    /></group>
+
+		<group    ref="group-nav"    >  <bounds x="970"   y="130"     width="230"    height="~boxH~" /></group>
+		<group    ref="group-editsnd">  <bounds x="1245"  y="130"     width="60"     height="~boxH~" /></group>
+		<group    ref="group-editseq">  <bounds x="1870"  y="130"     width="60"     height="~boxH~" /></group>
+		<group    ref="group-sounds" >  <bounds x="1350"  y="130"     width="460"    height="~boxH~" /></group>
+		<group    ref="group-track"  >  <bounds x="1990"  y="130"     width="190"    height="~boxH~" /></group>
+	</view>
+
+	<view name="Monitor friendly">
+		<group    ref="group-nav"    >  <bounds x="0"     y="0"       width="230"    height="~boxH~" /></group>
+		<group    ref="group-editsnd">  <bounds x="230"   y="0"       width="60"     height="~boxH~" /></group>
+		<group    ref="group-sounds" >  <bounds x="290"   y="0"       width="460"    height="~boxH~" /></group>
+		<group    ref="group-editseq">  <bounds x="770"   y="0"       width="60"     height="~boxH~" /></group>
+		<group    ref="group-track"  >  <bounds x="830"   y="0"       width="190"    height="~boxH~" /></group>
+		<group    ref="SvgKeyboard"  >  <bounds x="0"     y="~boxH~"  width="1020"   height="150"    /></group>
+	</view>
+	<!-- ============================================================================================================ -->
+</mamelayout>
