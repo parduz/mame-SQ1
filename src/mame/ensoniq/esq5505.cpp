@@ -181,6 +181,7 @@
 #include <cstdarg>
 #include <cstdio>
 
+#include "sq1.lh"
 
 namespace {
 
@@ -188,20 +189,22 @@ namespace {
 #define EPS     (1)
 #define SQ1     (2)
 
-#define KEYBOARD_HACK (1)   // turn on to play the SQ-1, SD-1, and SD-1 32-voice: Z and X are program up/down, A/S/D/F/G/H/J/K/L and Q/W/E/R/T/Y/U play notes
-
+// turn on to play the SQ-1, SD-1, and SD-1 32-voice:
+// Z and X are program up/down,
+// A/S/D/F/G/H/J/K/L and Q/W/E/R/T/Y/U play notes
+#define KEYBOARD_HACK (1)
 #if KEYBOARD_HACK
-static int shift = 32;
+ static int shift = 32;
 #endif
 
-#if 0
-static void ATTR_PRINTF(1,2) print_to_stderr(const char *format, ...)
-{
-	va_list arg;
-	va_start(arg, format);
-	vfprintf(stderr, format, arg);
-	va_end(arg);
-}
+// turn on to use the buttons on the panel - Parduz
+#define SQ1_CLICKABLE_ARTWORK (1)
+#if SQ1_CLICKABLE_ARTWORK
+ #if KEYBOARD_HACK
+  #define KBDHACK_KEYCODE(kbdChar) PORT_CODE(KEYCODE_##kbdChar)
+ #else
+  #define KBDHACK_KEYCODE(kbdChar)
+ #endif
 #endif
 
 class esq5505_state : public driver_device
@@ -459,6 +462,17 @@ void esq5505_state::sq1_map(address_map &map)
 	map(0x330000, 0x3bffff).ram(); // sequencer memory?
 	map(0xc00000, 0xc3ffff).rom().region("osrom", 0);
 	map(0xff0000, 0xffffff).ram().share("osram");
+	/*
+	The debugger spits out these messages each time the ROM/INT bank button is pressed
+	[:maincpu] ':maincpu' (C11996): unmapped program memory read from 2E0000 & 00FF
+	[:maincpu] ':maincpu' (C11996): unmapped program memory read from 2E0002 & 00FF
+	[:maincpu] ':maincpu' (C11996): unmapped program memory read from 2E0000 & 00FF
+	[:maincpu] ':maincpu' (C11996): unmapped program memory read from 2E0002 & 00FF
+
+	I'm pretty sure that the SQ1 is checking the expansion card slot to see if it has
+	to show "CARD A" -> "CARD B" banks or just stay with ROM / INT.
+	- Parduz
+	*/
 }
 
 WRITE_LINE_MEMBER(esq5505_state::esq5505_otis_irq)
@@ -581,56 +595,84 @@ WRITE_LINE_MEMBER(esq5505_state::dma_irq)
 #if KEYBOARD_HACK
 INPUT_CHANGED_MEMBER(esq5505_state::key_stroke)
 {
-	int val = (uint8_t)param;
-	int cmp = 0x60;
-
 	if (m_system_type == SQ1)
 	{
-		cmp = 10;
-	}
+		// FUNCTION REVISED FOR SQ1 by Parduz
+		char    NoteButton = (param & 0xFF00) != 0 ? 1:0;     // 1 if it is a note, 0 if it is a button
+		int     KeyCode    = (param & 0x00FF);                // The code of the key/button
+		bool    isPressed  = (oldval == 0 && newval == 1);    // Key pressed
+		bool    isReleased = (oldval == 1 && newval == 0);    // Key released
+		char    KeyAction  = isReleased?0x7F:0xFF;
 
-	if (val < cmp)
-	{
-		if (oldval == 0 && newval == 1)
-		{
-			if (val == 0 && shift > 0)
-			{
-				shift -= 32;
-				printf("New shift %d\n", shift);
-			}
-			else if (val == 1 && shift < 32)
-			{
-				shift += 32;
-				printf("New shift %d\n", shift);
-			}
-			else if (val == 0x02)
-			{
-//              printf("Analog tests!\n");
-				m_panel->xmit_char(54 | 0x80); m_panel->xmit_char(0); // Preset down
-				m_panel->xmit_char(8 | 0x80);  m_panel->xmit_char(0); // Compare down
-				m_panel->xmit_char(8);         m_panel->xmit_char(0); // Compare up
-				m_panel->xmit_char(54);        m_panel->xmit_char(0); // Preset up
-			}
+		if (isPressed==false && isReleased==false) {
+			printf("WHAT? oldval=%d, newval=%d\n", oldval, newval);
 		}
+		//--------------- DEBUG ------------------------------------------------------------------
+		/*
+		printf("KeybHack: %s param=%04X\n", (isPressed?"dw":isReleased?"up":"--"), param);
+		if (NoteButton) {
+			if (isPressed)	printf("Note PLAY    %02X\n", KeyCode);
+			else			printf("Note STOP    %02X\n", KeyCode);
+		}else{
+			if (isPressed)	printf("Button down  %02X\n", KeyCode);
+			else			printf("Button up    %02X\n", KeyCode);
+		}
+		*/
+		//--------------- DEBUG ------------------------------------------------------------------
+
+		if (isPressed==false && isReleased==false) return;
+		m_panel->xmit_char(KeyCode & KeyAction);
+		m_panel->xmit_char(NoteButton);
 	}
 	else
 	{
-		if (val < 20) val += shift;
-		if (oldval == 0 && newval == 1)
+		// ORIGINAL FUNCTION FOR VFX
+		int val = (uint8_t)param;
+		int cmp = 0x60;
+
+		if (val < cmp)
 		{
-	//      printf("key pressed %d\n", val);
-			m_panel->xmit_char(val);
-			m_panel->xmit_char(0x00);
+			if (oldval == 0 && newval == 1)
+			{
+				if (val == 0 && shift > 0)
+				{
+					shift -= 32;
+					printf("New shift %d\n", shift);
+				}
+				else if (val == 1 && shift < 32)
+				{
+					shift += 32;
+					printf("New shift %d\n", shift);
+				}
+				else if (val == 0x02)
+				{
+	//              printf("Analog tests!\n");
+					m_panel->xmit_char(54 | 0x80); m_panel->xmit_char(0); // Preset down
+					m_panel->xmit_char(8 | 0x80);  m_panel->xmit_char(0); // Compare down
+					m_panel->xmit_char(8);         m_panel->xmit_char(0); // Compare up
+					m_panel->xmit_char(54);        m_panel->xmit_char(0); // Preset up
+				}
+			}
 		}
-		else if (oldval == 1 && newval == 0)
+		else
 		{
-	//        printf("key off %x\n", (uint8_t)param);
-			m_panel->xmit_char(val&0x7f);
-			m_panel->xmit_char(0x00);
+			if (val < 20) val += shift;
+			if (oldval == 0 && newval == 1)
+			{
+		//      printf("key pressed %d\n", val);
+				m_panel->xmit_char(val);
+				m_panel->xmit_char(0x00);
+			}
+			else if (oldval == 1 && newval == 0)
+			{
+		//        printf("key off %x\n", (uint8_t)param);
+				m_panel->xmit_char(val&0x7f);
+				m_panel->xmit_char(0x00);
+			}
 		}
 	}
 }
-#endif
+#endif // KEYBOARD_HACK
 
 void esq5505_state::vfx(machine_config &config)
 {
@@ -785,6 +827,7 @@ void esq5505_state::sq1(machine_config &config)
 	ESQPANEL2X16_SQ1(config.replace(), m_panel);
 	m_panel->write_tx().set(m_duart, FUNC(mc68681_device::rx_b_w));
 	m_panel->write_analog().set(FUNC(esq5505_state::analog_w));
+	config.set_default_layout(layout_sq1);
 }
 
 void esq5505_state::ks32(machine_config &config)
@@ -799,6 +842,8 @@ void esq5505_state::ks32(machine_config &config)
 
 static INPUT_PORTS_START( vfx )
 #if KEYBOARD_HACK
+// Z and X are program up/down,
+// A/S/D/F/G/H/J/K/L and Q/W/E/R/T/Y/U play notes
 	PORT_START("KEY0")
 	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_A) PORT_CHAR('a') PORT_CHAR('A') PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke, 0x80)
 	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_S) PORT_CHAR('s') PORT_CHAR('S') PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke, 0x81)
@@ -840,54 +885,123 @@ static INPUT_PORTS_START( vfx )
 	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_0) PORT_CHAR('0') PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke, 1)
 
 	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_BACKSLASH) PORT_CHAR('\\') PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke, 2)
-#endif
+#endif //KEYBOARD_HACK
 INPUT_PORTS_END
 
 static INPUT_PORTS_START( sq1 )
-#if KEYBOARD_HACK
-	PORT_START("KEY0")
-	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_Q)         PORT_CHAR('q')  PORT_CHAR('Q')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  148) PORT_NAME("PITCH")  // 148=PITCH  (lo 1)
-	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_1)         PORT_CHAR('1')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  149) PORT_NAME("CONTROL")  // 149=CONTROL  (hi 1)
-	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_W)         PORT_CHAR('w')  PORT_CHAR('W')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  132) PORT_NAME("ENV1")  // 132=ENV1        (lo 2)
-	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_2)         PORT_CHAR('2')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  133) PORT_NAME("CLICK")  // 133=CLICK  (hi 2)
-	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_E)         PORT_CHAR('e')  PORT_CHAR('E')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  182) PORT_NAME("LFO")  // 182=LFO      (lo 3)
-	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_3)         PORT_CHAR('3')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  183) PORT_NAME("SONG")  // 183=SONG        (hi 3)
-	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_R)         PORT_CHAR('r')  PORT_CHAR('R')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  134) PORT_NAME("FILTER")  // 134=FILTER    (lo 4)
-	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_4)         PORT_CHAR('4')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  135) PORT_NAME("SEQ")  // 135=SEQ      (hi 4)
-	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_T)         PORT_CHAR('t')  PORT_CHAR('T')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  142) PORT_NAME("ENV2")  // 142=ENV2        (lo 5)
-	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_5)         PORT_CHAR('5')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  143) PORT_NAME("EVENT")  // 143=EVENT  (hi 5)
-	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_Y)         PORT_CHAR('y')  PORT_CHAR('Y')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  150) PORT_NAME("AMP")  // 150=AMP      (lo 6)
-	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_6)         PORT_CHAR('6')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  151) PORT_NAME("PARAM")  // 151=PARAM  (hi 6)
-	PORT_BIT(0x1000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_U)         PORT_CHAR('u')  PORT_CHAR('U')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  166) PORT_NAME("OUTPUT")  // 166=OUTPUT    (lo 7)
-	PORT_BIT(0x2000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_7)         PORT_CHAR('7')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  167) PORT_NAME("MIX")  // 167=MIX      (hi 7)
-	PORT_BIT(0x4000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_I)         PORT_CHAR('i')  PORT_CHAR('I')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  158) PORT_NAME("P. EFFECT")  // 158=P.EFFECT   (lo 8)
-	PORT_BIT(0x8000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_8)         PORT_CHAR('8')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  159) PORT_NAME("S. EFFECT")  // 159=S.EFFECT   (hi 8)
-	PORT_START("KEY1")
-	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_O)         PORT_CHAR('o')  PORT_CHAR('O')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  174) PORT_NAME("MIDI")  // 174=MIDI        (lo 9)
-	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_9)         PORT_CHAR('9')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  175) PORT_NAME("SYSTEM")  // 175=SYSTEM    (hi 9)
-	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_P)         PORT_CHAR('p')  PORT_CHAR('P')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  164) PORT_NAME("WAVE")  // 164=WAVE        (lo 0)
-	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_0)         PORT_CHAR('0')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  165) PORT_NAME("LOCATE")  // 165=LOCATE    (hi 0)
-	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_G)         PORT_CHAR('g')  PORT_CHAR('G')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  144) PORT_NAME("TRACK 1")  // 144=Track 1
-	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_H)         PORT_CHAR('h')  PORT_CHAR('H')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  160) PORT_NAME("TRACK 2")  // 160=Track 2
-	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_J)         PORT_CHAR('j')  PORT_CHAR('J')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  152) PORT_NAME("TRACK 3")  // 152=Track 3
-	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_K)         PORT_CHAR('k')  PORT_CHAR('K')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  168) PORT_NAME("TRACK 4")  // 168=Track 4
-	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_V)         PORT_CHAR('v')  PORT_CHAR('V')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  145) PORT_NAME("TRACK 5")  // 145=Track 5
-	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_B)         PORT_CHAR('b')  PORT_CHAR('B')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  161) PORT_NAME("TRACK 6")  // 161=Track 6
-	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_N)         PORT_CHAR('n')  PORT_CHAR('N')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  136) PORT_NAME("TRACK 7")  // 136=Track 7
-	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_M)         PORT_CHAR('m')  PORT_CHAR('M')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  176) PORT_NAME("TRACK 8")  // 176=Track 8
-	PORT_BIT(0x1000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_ENTER)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  172) PORT_NAME("ENTER")  // 172=ENTER
-	PORT_BIT(0x2000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_BACKSPACE)                                 PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  173) PORT_NAME("COMPARE")  // 173=COMPARE
-	PORT_BIT(0x4000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_DOWN)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  140) PORT_NAME("PROG DN")  // 140=ProgDn
-	PORT_BIT(0x8000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_UP)                                        PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  141) PORT_NAME("PROG UP")  // 141=ProgUp
-	PORT_START("KEY2")
-	PORT_BIT(0x2000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_RIGHT)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  156) PORT_NAME("ROM/INT SELECT +")  // 156=ROM/INT Select  189=track +
-	PORT_BIT(0x4000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_LEFT)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  157) PORT_NAME("ROM/INT SELECT -")  // 157=ROM/INT Select  190=track -
-	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_Z)         PORT_CHAR('z')  PORT_CHAR('Z')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  180) PORT_NAME("SOUND SELECT")  // 180=SOUND Select
-	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_A)         PORT_CHAR('a')  PORT_CHAR('A')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  181) PORT_NAME("SOUND EDIT")  // 181=SOUND Edit
-	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_S)         PORT_CHAR('s')  PORT_CHAR('S')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  184) PORT_NAME("SEQ EDIT")  // 184=SEQ Edit
-	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_X)         PORT_CHAR('x')  PORT_CHAR('X')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  153) PORT_NAME("SEQ SELECT")  // 153=SEQ Select
-	PORT_START("KEY3")
-#endif
+#if SQ1_CLICKABLE_ARTWORK
+	PORT_START("BUT0")                                                                                                                                                                                                                                      
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_Q)         PORT_CHAR('q')  PORT_CHAR('Q')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x94) PORT_NAME("lo 1")       // 148=PITCH     
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_1)         PORT_CHAR('1')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x95) PORT_NAME("hi 1")       // 149=CONTROL   
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_W)         PORT_CHAR('w')  PORT_CHAR('W')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x84) PORT_NAME("lo 2")       // 132=ENV1      
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_2)         PORT_CHAR('2')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x85) PORT_NAME("hi 2")       // 133=CLICK     
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_E)         PORT_CHAR('e')  PORT_CHAR('E')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xB6) PORT_NAME("lo 3")       // 182=LFO       
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_3)         PORT_CHAR('3')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xB7) PORT_NAME("hi 3")       // 183=SONG      
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_R)         PORT_CHAR('r')  PORT_CHAR('R')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x86) PORT_NAME("lo 4")       // 134=FILTER    
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_4)         PORT_CHAR('4')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x87) PORT_NAME("hi 4")       // 135=SEQ       
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_T)         PORT_CHAR('t')  PORT_CHAR('T')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x8E) PORT_NAME("lo 5")       // 142=ENV2      
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_5)         PORT_CHAR('5')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x8F) PORT_NAME("hi 5")       // 143=EVENT     
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_Y)         PORT_CHAR('y')  PORT_CHAR('Y')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x96) PORT_NAME("lo 6")       // 150=AMP       
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_6)         PORT_CHAR('6')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x97) PORT_NAME("hi 6")       // 151=PARAM     
+	PORT_BIT(0x1000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_U)         PORT_CHAR('u')  PORT_CHAR('U')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA6) PORT_NAME("lo 7")       // 166=OUTPUT    
+	PORT_BIT(0x2000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_7)         PORT_CHAR('7')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA7) PORT_NAME("hi 7")       // 167=MIX       
+	PORT_BIT(0x4000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_I)         PORT_CHAR('i')  PORT_CHAR('I')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x9E) PORT_NAME("lo 8")       // 158=P.EFFECT  
+	PORT_BIT(0x8000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_8)         PORT_CHAR('8')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x9F) PORT_NAME("hi 8")       // 159=S.EFFECT  
+	PORT_START("BUT1")                                                                                                                                                                                                                              
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_O)         PORT_CHAR('o')  PORT_CHAR('O')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xAE) PORT_NAME("lo 9")       // 174=MIDI      
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_9)         PORT_CHAR('9')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xAF) PORT_NAME("hi 9")       // 175=SYSTEM    
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_P)         PORT_CHAR('p')  PORT_CHAR('P')  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA4) PORT_NAME("lo 0")       // 164=WAVE      
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_0)         PORT_CHAR('0')                  PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA5) PORT_NAME("hi 0")       // 165=LOCATE    
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_1_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x90) PORT_NAME("SEQ TRACK 1")// 144=Track 1
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_2_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA0) PORT_NAME("SEQ TRACK 2")// 160=Track 2
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_3_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x98) PORT_NAME("SEQ TRACK 3")// 152=Track 3
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_4_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA8) PORT_NAME("SEQ TRACK 4")// 168=Track 4
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_5_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x91) PORT_NAME("SEQ TRACK 5")// 145=Track 5
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_6_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xA1) PORT_NAME("SEQ TRACK 6")// 161=Track 6
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_7_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x88) PORT_NAME("SEQ TRACK 7")// 136=Track 7
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_8_PAD)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xB0) PORT_NAME("SEQ TRACK 8")// 176=Track 8
+	PORT_BIT(0x1000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_ENTER)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xAC) PORT_NAME("ENTER")      // 172=ENTER
+	PORT_BIT(0x2000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_BACKSPACE)                                 PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xAD) PORT_NAME("COMPARE")    // 173=COMPARE
+	PORT_BIT(0x4000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_DOWN)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x8C) PORT_NAME("NAV DN")     // 140=ProgDn
+	PORT_BIT(0x8000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_UP)                                        PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x8D) PORT_NAME("NAV UP")     // 141=ProgUp
+	PORT_START("BUT2")                                                                                                                                                                                                                                        
+	PORT_BIT(0x2000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_RIGHT)                                     PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x9C) PORT_NAME("NAV R")      // 156=ROM/INT Select  189=track +
+	PORT_BIT(0x4000, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_LEFT)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x9D) PORT_NAME("NAV L")      // 157=ROM/INT Select  190=track -
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_END)                                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xB4) PORT_NAME("SND SELECT") // 180=SOUND Select
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_HOME)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xB5) PORT_NAME("SND EDIT")   // 181=SOUND Edit
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_PGUP)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0xB8) PORT_NAME("SEQ EDIT")   // 184=SEQ Edit
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) PORT_CODE(KEYCODE_PGDN)                                      PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x99) PORT_NAME("SEQ SELECT") // 153=SEQ Select
+	PORT_START("BUT3")
+
+
+	PORT_START("Octave2")                                                                                                                   
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0180) PORT_NAME("_MIDI-36 - C2" )
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0181) PORT_NAME("_MIDI-37 - C2#")
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0182) PORT_NAME("_MIDI-38 - D2" )
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0183) PORT_NAME("_MIDI-39 - D2#")
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0184) PORT_NAME("_MIDI-40 - E2" )
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0185) PORT_NAME("_MIDI-41 - F2" )
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0186) PORT_NAME("_MIDI-42 - F2#")
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0187) PORT_NAME("_MIDI-43 - G2" )
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0188) PORT_NAME("_MIDI-44 - G2#")
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0189) PORT_NAME("_MIDI-45 - A2" )
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x018A) PORT_NAME("_MIDI-46 - A2#")
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x018B) PORT_NAME("_MIDI-47 - B2" )
+	PORT_START("Octave3")                                                                                                                                     
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x018C) PORT_NAME("_MIDI-48 - C3" )
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x018D) PORT_NAME("_MIDI-49 - C3#")
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x018E) PORT_NAME("_MIDI-50 - D3" )
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x018F) PORT_NAME("_MIDI-51 - D3#")
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0190) PORT_NAME("_MIDI-52 - E3" )
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0191) PORT_NAME("_MIDI-53 - F3" )
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0192) PORT_NAME("_MIDI-54 - F3#")
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0193) PORT_NAME("_MIDI-55 - G3" )
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0194) PORT_NAME("_MIDI-56 - G3#")
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0195) PORT_NAME("_MIDI-57 - A3" )
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0196) PORT_NAME("_MIDI-58 - A3#")
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0197) PORT_NAME("_MIDI-59 - B3" )
+	PORT_START("Octave4")                                                                                                                   
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(Z)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0198) PORT_NAME("_MIDI-60 - C4" )
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(S)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x0199) PORT_NAME("_MIDI-61 - C4#")
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(X)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x019A) PORT_NAME("_MIDI-62 - D4" )
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(D)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x019B) PORT_NAME("_MIDI-63 - D4#")
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(C)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x019C) PORT_NAME("_MIDI-64 - E4" )
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(V)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x019D) PORT_NAME("_MIDI-65 - F4" )
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(G)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x019E) PORT_NAME("_MIDI-66 - F4#")
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(B)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x019F) PORT_NAME("_MIDI-67 - G4" )
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(H)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A0) PORT_NAME("_MIDI-68 - G4#")
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(N)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A1) PORT_NAME("_MIDI-69 - A4" )
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(J)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A2) PORT_NAME("_MIDI-70 - A4#")
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD) KBDHACK_KEYCODE(M)    PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A3) PORT_NAME("_MIDI-71 - B4" )
+	PORT_START("Octave5")                                                                                                                   
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A4) PORT_NAME("_MIDI-72 - C5" )
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A5) PORT_NAME("_MIDI-73 - C5#")
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A6) PORT_NAME("_MIDI-74 - D5" )
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A7) PORT_NAME("_MIDI-75 - D5#")
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A8) PORT_NAME("_MIDI-76 - E5" )
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01A9) PORT_NAME("_MIDI-77 - F5" )
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01AA) PORT_NAME("_MIDI-78 - F5#")
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01AB) PORT_NAME("_MIDI-79 - G5" )
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01AC) PORT_NAME("_MIDI-80 - G5#")
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01AD) PORT_NAME("_MIDI-81 - A5" )
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01AE) PORT_NAME("_MIDI-82 - A5#")
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01AF) PORT_NAME("_MIDI-83 - B5" )
+	PORT_START("Octave6")                                                                                                                                     
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B0) PORT_NAME("_MIDI-84 - C6" )
+	PORT_BIT(0x0002, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B1) PORT_NAME("_MIDI-85 - C6#")
+	PORT_BIT(0x0004, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B2) PORT_NAME("_MIDI-86 - D6" )
+	PORT_BIT(0x0008, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B3) PORT_NAME("_MIDI-87 - D6#")
+	PORT_BIT(0x0010, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B4) PORT_NAME("_MIDI-88 - E6" )
+	PORT_BIT(0x0020, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B5) PORT_NAME("_MIDI-89 - F6" )
+	PORT_BIT(0x0040, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B6) PORT_NAME("_MIDI-90 - F6#")
+	PORT_BIT(0x0080, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B7) PORT_NAME("_MIDI-91 - G6" )
+	PORT_BIT(0x0100, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B8) PORT_NAME("_MIDI-92 - G6#")
+	PORT_BIT(0x0200, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01B9) PORT_NAME("_MIDI-93 - A6" )
+	PORT_BIT(0x0400, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01BA) PORT_NAME("_MIDI-94 - A6#")
+	PORT_BIT(0x0800, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01BB) PORT_NAME("_MIDI-95 - B6" )
+	PORT_START("Octave7")                                                                                                                   
+	PORT_BIT(0x0001, IP_ACTIVE_HIGH, IPT_KEYBOARD)                       PORT_CHANGED_MEMBER(DEVICE_SELF, esq5505_state, key_stroke,  0x01BC) PORT_NAME("_MIDI-96 - C7" )
+#endif // SQ1_CLICKABLE_ARTWORK
 INPUT_PORTS_END
 
 #define ROM_LOAD16_BYTE_BIOS(bios,name,offset,length,hash) \
@@ -1069,13 +1183,11 @@ void esq5505_state::init_sq1()
 {
 	init_common();
 	m_system_type = SQ1;
-#if KEYBOARD_HACK
-	shift = 60;
-#endif
 }
 
 void esq5505_state::init_denib()
 {
+
 	uint8_t *pNibbles = (uint8_t *)memregion("nibbles")->base();
 	uint8_t *pBS0L = (uint8_t *)memregion("waverom")->base();
 	uint8_t *pBS0H = pBS0L + 0x100000;
@@ -1102,8 +1214,8 @@ CONS( 1989, vfx,    0,   0, vfx,   vfx, esq5505_state, init_denib,  "Ensoniq", "
 CONS( 1989, vfxsd,  0,   0, vfxsd, vfx, esq5505_state, init_denib,  "Ensoniq", "VFX-SD",          MACHINE_NOT_WORKING )  // 2x40 VFD
 CONS( 1990, eps16p, eps, 0, eps,   vfx, esq5505_state, init_eps,    "Ensoniq", "EPS-16 Plus",     MACHINE_NOT_WORKING )  // custom VFD: one alphanumeric 22-char row, one graphics-capable row (alpha row can also do bar graphs)
 CONS( 1990, sd1,    0,   0, vfxsd, vfx, esq5505_state, init_denib,  "Ensoniq", "SD-1 (21 voice)", MACHINE_NOT_WORKING )  // 2x40 VFD
-CONS( 1990, sq1,    0,   0, sq1,   sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-1",            MACHINE_NOT_WORKING )  // 2x16 LCD
+CONS( 1990, sq1,    0,   0, sq1,   sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-1",            MACHINE_IMPERFECT_SOUND | MACHINE_CLICKABLE_ARTWORK )  // 2x16 LCD
 CONS( 1990, sqrack, sq1, 0, sq1,   sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-Rack",         MACHINE_NOT_WORKING )  // 2x16 LCD
 CONS( 1991, sq2,    0,   0, ks32,  sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-2",            MACHINE_NOT_WORKING )  // 2x16 LCD
 CONS( 1991, sd132,  sd1, 0, vfx32, vfx, esq5505_state, init_denib,  "Ensoniq", "SD-1 (32 voice)", MACHINE_NOT_WORKING )  // 2x40 VFD
-CONS( 1992, ks32,   sq2, 0, ks32,  sq1, esq5505_state, init_sq1,    "Ensoniq", "KS-32",           MACHINE_NOT_WORKING)                       // 2x16 LCD
+CONS( 1992, ks32,   sq2, 0, ks32,  sq1, esq5505_state, init_sq1,    "Ensoniq", "KS-32",           MACHINE_NOT_WORKING )  // 2x16 LCD
