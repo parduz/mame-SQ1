@@ -85,12 +85,9 @@ Ensoniq OTIS - ES5505                                            Ensoniq OTTO - 
 #include "emu.h"
 #include "es5506.h"
 #include <algorithm>
+#include <iostream>
 
-#if ES5506_MAKE_WAVS
-#include "sound/wavwrite.h"
-#endif
-
-
+int ParduzDebug=0;
 /**********************************************************************************************
 
      CONSTANTS
@@ -228,6 +225,12 @@ void es550x_device::device_start()
 	save_item(STRUCT_MEMBER(m_voice, o2n1));
 	save_item(STRUCT_MEMBER(m_voice, o2n2));
 	save_item(STRUCT_MEMBER(m_voice, o1n1));
+
+#if PARDUZ_WANTS_WAVS
+	was_silent_for = 500;
+	there_was_silence = 1;
+printf("550x START\n");
+#endif
 }
 
 void es5506_device::device_start()
@@ -286,8 +289,12 @@ void es5506_device::device_start()
 	save_item(STRUCT_MEMBER(m_voice, k2ramp));
 	save_item(STRUCT_MEMBER(m_voice, k1ramp));
 	save_item(STRUCT_MEMBER(m_voice, filtcount));
-
 	// success
+#if PARDUZ_WANTS_WAVS
+	was_silent_for = 500;
+	there_was_silence = 1;
+printf("5506 START\n");
+#endif
 }
 
 //-------------------------------------------------
@@ -301,6 +308,11 @@ void es550x_device::device_clock_changed()
 	m_stream->set_sample_rate(m_sample_rate);
 	if (!m_sample_rate_changed_cb.isnull())
 		m_sample_rate_changed_cb(m_sample_rate);
+
+#if PARDUZ_WANTS_WAVS
+	close_wav_file();
+	//if (m_sample_rate) open_wav_file();
+#endif
 }
 
 //-------------------------------------------------
@@ -325,11 +337,63 @@ void es5506_device::device_reset() // RESB for Reset input
 void es550x_device::device_stop()
 {
 #if ES5506_MAKE_WAVS
-	{
-		wav_close(m_wavraw);
-	}
+	m_wavraw = nullptr;
+#endif
+
+#if PARDUZ_WANTS_WAVS
+	close_wav_file();
 #endif
 }
+
+
+
+#if PARDUZ_WANTS_WAVS
+void es550x_device::open_wav_file()
+{
+	std::string wav_file_name = util::string_format("esq550xSample_%03d.wav", WavFileCounter);
+
+	m_wavraw = util::wav_open(wav_file_name, m_sample_rate, 2);
+	if (m_wavraw) { // if file is open
+		//LOG(1, "esq550x: Logging output to %s\n", wav_file_name.c_str());
+		wav_l.clear();
+		wav_r.clear();
+printf("\n\n-_- WAV OPENED %d -_-\n",WavFileCounter);
+	}else{
+		//LOG(1, "esq550x: ERROR OPENING %s\n", wav_file_name.c_str());
+	}
+}
+void es550x_device::close_wav_file()
+{
+	if (m_wavraw) { // if file is open
+		save_wav_data();
+		m_wavraw.reset();
+		m_wavraw = nullptr;
+printf("-_- WAV CLOSED %d -_-\n\n\n",WavFileCounter);
+		if (SavedSamples)
+			++WavFileCounter;
+	}else{
+printf("!\n");
+	}
+	SavingWav = false;
+	SaveLoop = SavedLoops = 0;
+	SavedSamples = 0;
+}
+void es550x_device::save_wav_data()
+{
+	if (m_wavraw) { // if file is open
+		if (wav_l.empty()==false) {
+printf ("w%llu ",wav_l.size() );
+			SavedSamples += wav_l.size();
+			util::wav_add_data_32lr(*m_wavraw, wav_l.data(), wav_r.data(), wav_l.size(), 2);
+			// resize dynamic array - don't want it to copy if it needs to expand
+			wav_l.clear();
+			wav_r.clear();
+printf (" W\n");
+		}
+	}
+}
+#endif // PARDUZ_WANTS_WAVS
+
 
 //-------------------------------------------------
 //  memory_space_config - return a description of
@@ -391,6 +455,11 @@ void es5505_device::device_start()
 	get_accum_mask(ADDRESS_INTEGER_BIT_ES5505, ADDRESS_FRAC_BIT_ES5505);
 
 	// success
+#if PARDUZ_WANTS_WAVS
+	was_silent_for = 500;
+	there_was_silence = 1;
+printf("5505 START\n");
+#endif
 }
 
 //-------------------------------------------------
@@ -760,6 +829,18 @@ inline void es5505_device::check_for_end_forward(es550x_voice *voice, u64 &accum
 		if (voice->control & CONTROL_IRQE)
 			voice->control |= CONTROL_IRQ;
 
+#if PARDUZ_WANTS_WAVS
+		if (SavingWav) {
+			switch (voice->control & CONTROL_LOOPMASK)
+			{
+				case 0:                         SaveLoop = 4; printf("> ------|"); break; // non-looping
+				case CONTROL_LPE:               SaveLoop = 1; printf("> ------>"); break; // uni-directional looping
+				case CONTROL_BLE:               SaveLoop = 2; printf("> ---^---"); break; // trans-wave looping
+				case CONTROL_LPE | CONTROL_BLE: SaveLoop = 3; printf("> <----->"); break; // bi-directional looping
+			}
+		}
+#endif
+
 		// handle the different types of looping
 		switch (voice->control & CONTROL_LOOPMASK)
 		{
@@ -791,6 +872,18 @@ inline void es5505_device::check_for_end_reverse(es550x_voice *voice, u64 &accum
 		// generate interrupt if required
 		if (voice->control & CONTROL_IRQE)
 			voice->control |= CONTROL_IRQ;
+
+#if PARDUZ_WANTS_WAVS
+		if (SavingWav) {
+			switch (voice->control & CONTROL_LOOPMASK)
+			{
+				case 0:                         SaveLoop = 8; printf("< ------|"); break; // non-looping
+				case CONTROL_LPE:               SaveLoop = 5; printf("< ------>"); break; // uni-directional looping
+				case CONTROL_BLE:               SaveLoop = 6; printf("< ---^---"); break; // trans-wave looping
+				case CONTROL_LPE | CONTROL_BLE: SaveLoop = 7; printf("< <----->"); break; // bi-directional looping
+			}
+		}
+#endif
 
 		// handle the different types of looping
 		switch (voice->control & CONTROL_LOOPMASK)
@@ -1049,6 +1142,7 @@ void es5506_device::generate_samples(std::vector<write_stream_view> &outputs)
 
 void es5505_device::generate_samples(std::vector<write_stream_view> &outputs)
 {
+
 	// loop while we still have samples to generate
 	for (int sampindex = 0; sampindex < outputs[0].samples(); sampindex++)
 	{
@@ -1078,11 +1172,171 @@ void es5505_device::generate_samples(std::vector<write_stream_view> &outputs)
 
 			// does this voice have it's IRQ bit raised?
 			generate_irq(voice, v);
-		}
+		} // end of for voice
 
-		for (int c = 0; c < outputs.size(); c++)
+		for (int c = 0; c < outputs.size(); c++) 
 			outputs[c].put_int(sampindex, cursample[c], 32768);
+
+#if PARDUZ_WANTS_WAVS
+		// log the raw data
+//		if (m_wavraw) // if file is open
+		{ 
+//if (SaveLoop) printf(" SaveLoop: %d, SavedLoops: %u, SavingWav: %d\n",SaveLoop, SavedLoops, SavingWav?1:0);
+			s32 l=0; 
+			s32 r=0; 
+			for (int samp = 0; samp<12; samp++) {
+				// read all the 12 currsample and sum them
+				l += cursample[samp++];
+				r += cursample[samp  ];
+			}
+
+			// Detect silence
+			was_silent_for++;
+			if (l != 0 || r != 0 )
+				was_silent_for = 0;
+			bool there_is_silence = was_silent_for >= 500;
+
+			if (there_was_silence != there_is_silence) {
+				// Something happens
+				if (there_is_silence==false) {
+printf("__--\n");
+					if (m_wavraw) { // if file is open
+					}else{
+						open_wav_file();
+					}
+					SavingWav = true;
+				} else {
+printf("--__\n");
+					save_wav_data();
+					SavingWav = false;
+				}
+				there_was_silence = there_is_silence;
+			}
+
+			// Save samples if not silence
+			if (SavingWav) {
+				wav_l.push_back(l);
+				wav_r.push_back(r);
+				if (SaveLoop)
+				{
+					wav_l.push_back(0x7FFFFFFF);
+					wav_l.push_back(0x7FFFFFFF);
+					wav_l.push_back(0x7FFFFFFF);
+					wav_l.push_back(0x7FFFFFFF);
+					switch (SaveLoop) {
+						case 4: // non-looping
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0x7FFFFFFF);
+							SavedLoops = 1000;	// Stop saving here.
+printf("----| ");
+
+							break;
+						case 1: // uni-directional looping
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0);
+							wav_r.push_back(0);
+							wav_r.push_back(0);
+printf("----> ");
+							break;
+
+						case 2: // trans-wave looping
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0);
+							wav_r.push_back(0);
+							SavedLoops -= 2;
+printf("--^-- ");
+							break;
+
+						case 3: // bi-directional looping
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0x7FFFFFFF);
+							wav_r.push_back(0);
+printf("<---> ");
+							break;
+
+						case 8: // non-looping
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0xFFFFFFFF);
+							SavedLoops = 1000;	// Stop saving here.
+printf(".----| ");
+
+							break;
+						case 5: // uni-directional looping
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0);
+							wav_r.push_back(0);
+							wav_r.push_back(0);
+printf(".----> ");
+							break;
+
+						case 6: // trans-wave looping
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0);
+							wav_r.push_back(0);
+							SavedLoops -= 2;
+printf(".--^-- ");
+							break;
+
+						case 7: // bi-directional looping
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0xFFFFFFFF);
+							wav_r.push_back(0);
+printf(".<---> ");
+							break;
+
+					} // end switch
+					save_wav_data();
+					++SavedLoops;
+
+					if (SavedLoops>10) {
+printf("> SavedLoops: %u\n",SavedLoops);
+						close_wav_file();
+					}
+					else if (SavedLoops<-4000) {
+printf("< SavedLoops: %u\n",SavedLoops);
+						close_wav_file();
+					}
+				}
+				SaveLoop = 0;
+			}
+		}
+#endif
+
+#if ES5506_MAKE_WAVS
+		// log the raw data
+		if (m_wavraw) { // if file is open
+			s32 l=0; 
+			s32 r=0; 
+			for (int samp = 0; samp<12; samp++) {
+				// read all the 12 currsample and sum them
+				l += cursample[samp++];
+				r += cursample[samp  ];
+			}
+			wav_l.push_back(l);
+			wav_r.push_back(r);
+		}
+#endif
+
+	}	// end of for sampindex
+
+#if ES5506_MAKE_WAVS
+	if (m_wavraw) { // if file is open
+		if (wav_l.size()>=100 || wav_r.size() >=100) {
+			util::wav_add_data_32lr(*m_wavraw, wav_l.data(), wav_r.data(), wav_l.size(), 4);
+			// resize dynamic array - don't want it to copy if it needs to expand
+			wav_l.clear();
+			wav_r.clear();
+		}
 	}
+#endif
 }
 
 
@@ -2097,40 +2351,29 @@ u16 es5505_device::read(offs_t offset)
 
 void es550x_device::sound_stream_update(sound_stream &stream, std::vector<read_stream_view> const &inputs, std::vector<write_stream_view> &outputs)
 {
-#if ES5506_MAKE_WAVS
+	#if ES5506_MAKE_WAVS
 	// start the logging once we have a sample rate
 	if (m_sample_rate)
 	{
-		if (!m_wavraw)
-			m_wavraw = wav_open("raw.wav", m_sample_rate, 2);
+		if (!m_wavraw) 
+		{
+			m_wavraw = util::wav_open("raw.wav", m_sample_rate, 2);
+			if (!m_wavraw) {
+				util::stream_format(std::cerr, "Wav file open ERROR (%p) \n", m_wavraw.get());
+			}else{
+				printf("\n\n-_-_-_- WAV OPENED (%p)-_-_-_-\n",m_wavraw.get());
+				wav_l.clear();
+				wav_r.clear();
+				printf ("^ ");
+			}
+		}
 	}
-#endif
+	#endif
+
+
+
 
 	// loop until all samples are output
 	generate_samples(outputs);
 
-#if ES5506_MAKE_WAVS
-	// log the raw data
-	if (m_wavraw)
-	{
-		// determine left/right source data
-
-		s32 *lsrc = m_scratch, *rsrc = m_scratch + length;
-		int channel;
-		memset(lsrc, 0, sizeof(s32) * length * 2);
-		// loop over the output channels
-		for (channel = 0; channel < m_channels; channel++)
-		{
-			s32 *l = outputs[(channel << 1)] + sampindex;
-			s32 *r = outputs[(channel << 1) + 1] + sampindex;
-			// add the current channel's samples to the WAV data
-			for (samp = 0; samp < length; samp++)
-			{
-				lsrc[samp] += l[samp];
-				rsrc[samp] += r[samp];
-			}
-		}
-		wav_add_data_32lr(m_wavraw, lsrc, rsrc, length, 4);
-	}
-#endif
 }
