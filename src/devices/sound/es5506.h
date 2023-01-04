@@ -12,7 +12,12 @@
 
 #pragma once
 
+#define PARDUZ_WANTS_WAVS 0
 #define ES5506_MAKE_WAVS 0
+
+#if ES5506_MAKE_WAVS || PARDUZ_WANTS_WAVS
+ #include"wavwrite.h"
+#endif
 
 class es550x_device : public device_t, public device_sound_interface, public device_memory_interface
 {
@@ -140,9 +145,23 @@ protected:
 	std::vector<s16> m_ulaw_lookup;
 	std::vector<u32> m_volume_lookup;
 
-#if ES5506_MAKE_WAVS
-	std::vector<s32> m_scratch;
-	void *      m_wavraw;                 // raw waveform
+#if ES5506_MAKE_WAVS || PARDUZ_WANTS_WAVS
+	std::vector<s32>       wav_l;
+	std::vector<s32>       wav_r;
+	util::wav_file_ptr     m_wavraw;               // raw waveform unique_ptr
+#endif
+
+#if PARDUZ_WANTS_WAVS
+ 	bool SavingWav = false;
+ 	int  SaveLoop = 0;
+ 	int  SavedLoops = 0;
+ 	int  WavFileCounter = 0;
+ 	uint64_t SavedSamples=0;
+ 	void open_wav_file();
+ 	void close_wav_file();
+ 	void save_wav_data();
+ 	int  was_silent_for;
+ 	bool there_was_silence;
 #endif
 
 	optional_memory_region m_region0;             // memory region where the sample ROM lives
@@ -257,6 +276,7 @@ private:
 	inline u16 reg_read_test(es550x_voice *voice, offs_t offset);
 
 	memory_access<20, 1, -1, ENDIANNESS_BIG>::cache m_cache[2];
+
 };
 
 DECLARE_DEVICE_TYPE(ES5505, es5505_device)
